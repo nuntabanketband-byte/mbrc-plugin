@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using MusicBeePlugin.Providers;
 using MusicBeePlugin.Models;
 using MusicBeePlugin.Ffi;
@@ -32,12 +34,49 @@ namespace MusicBeePlugin.Providers
             if (fromIndex == toIndex)
                 return true;
 
+            LogCurrentTrackState("BEFORE", fromIndex, toIndex);
+
             int[] fromIndices = { fromIndex };
             int destinationIndex = fromIndex > toIndex
                 ? toIndex - 1
                 : toIndex;
 
-            return _api.NowPlayingList_MoveFiles(fromIndices, destinationIndex);
+            var moved = _api.NowPlayingList_MoveFiles(fromIndices, destinationIndex);
+            LogCurrentTrackState("AFTER", fromIndex, toIndex, moved);
+            return moved;
+        }
+
+        /// <summary>
+        /// Writes diagnostic snapshots around a queue move. This deliberately logs
+        /// both MusicBee's current-playing URL and the URL at its reported queue index,
+        /// so we can tell whether the host index moved independently of the playing file.
+        /// </summary>
+        private void LogCurrentTrackState(string phase, int fromIndex, int toIndex, bool? moveResult = null)
+        {
+            try
+            {
+                var playingUrl = _api.NowPlaying_GetFileUrl() ?? string.Empty;
+                var querySucceeded = _api.NowPlayingList_QueryFiles(null);
+                var currentIndex = querySucceeded ? _api.NowPlayingList_GetCurrentIndex() : -1;
+                var indexedUrl = querySucceeded && currentIndex >= 0
+                    ? _api.NowPlayingList_GetListFileUrl(currentIndex) ?? string.Empty
+                    : string.Empty;
+                var logDirectory = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "MusicBeeRemote");
+                Directory.CreateDirectory(logDirectory);
+                var logPath = Path.Combine(logDirectory, "queue-move-debug.log");
+                var line = string.Format(
+                    "{0:O} phase={1} from={2} to={3} moveResult={4} queryOk={5} currentIndex={6} playingUrl=\"{7}\" indexedUrl=\"{8}\"{9}",
+                    DateTime.Now, phase, fromIndex, toIndex,
+                    moveResult.HasValue ? moveResult.Value.ToString() : "n/a",
+                    querySucceeded, currentIndex, playingUrl, indexedUrl, Environment.NewLine);
+                File.AppendAllText(logPath, line);
+            }
+            catch
+            {
+                // Diagnostics must never break playback or queue operations.
+            }
         }
 
         public bool RemoveFromNowPlayingList(int index)
