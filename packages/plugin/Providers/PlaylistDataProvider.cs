@@ -22,17 +22,20 @@ namespace MusicBeePlugin.Providers
 
         public bool MoveNowPlayingTrack(int fromIndex, int toIndex)
         {
-            // MusicBee's NowPlayingList_MoveFiles destination is the insertion
-            // index in the list after source items have been removed. The source
-            // and destination here are zero-based positions from the same
-            // now-playing list query. Do not subtract one when moving upward:
-            // that shifts the track one slot too early and can desynchronise the
-            // active-track marker from the Android queue.
+            // MusicBee's destination means "move after this index". When moving
+            // a track upward, the source is removed before the destination is
+            // resolved, so the insertion index must be shifted back by one.
+            // Keep this adjustment paired with the Android client's destination
+            // compensation; changing only one side creates an off-by-one move.
             if (fromIndex < 0 || toIndex < 0 || fromIndex == toIndex)
                 return false;
 
             int[] fromIndices = { fromIndex };
-            return _api.NowPlayingList_MoveFiles(fromIndices, toIndex);
+            int destinationIndex = fromIndex > toIndex
+                ? toIndex - 1
+                : toIndex;
+
+            return _api.NowPlayingList_MoveFiles(fromIndices, destinationIndex);
         }
 
         public bool RemoveFromNowPlayingList(int index)
