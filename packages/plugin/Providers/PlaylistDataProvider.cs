@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Globalization;
 using MusicBeePlugin.Providers;
 using MusicBeePlugin.Models;
 using MusicBeePlugin.Ffi;
@@ -66,7 +67,7 @@ namespace MusicBeePlugin.Providers
                     "MusicBeeRemote");
                 Directory.CreateDirectory(logDirectory);
                 var logPath = Path.Combine(logDirectory, "queue-move-debug.log");
-                var line = string.Format(
+                var line = string.Format(CultureInfo.InvariantCulture,
                     "{0:O} phase={1} from={2} to={3} moveResult={4} queryOk={5} currentIndex={6} playingUrl=\"{7}\" indexedUrl=\"{8}\"{9}",
                     DateTime.Now, phase, fromIndex, toIndex,
                     moveResult.HasValue ? moveResult.Value.ToString() : "n/a",
