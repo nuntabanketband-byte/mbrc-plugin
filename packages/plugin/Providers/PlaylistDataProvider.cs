@@ -22,13 +22,15 @@ namespace MusicBeePlugin.Providers
 
         public bool MoveNowPlayingTrack(int fromIndex, int toIndex)
         {
-            // MusicBee's destination means "move after this index". When moving
-            // a track upward, the source is removed before the destination is
-            // resolved, so the insertion index must be shifted back by one.
-            // Keep this adjustment paired with the Android client's destination
-            // compensation; changing only one side creates an off-by-one move.
-            if (fromIndex < 0 || toIndex < 0 || fromIndex == toIndex)
+            // Both positions are zero-based slots in the queue. MusicBee's API
+            // takes the index of the item to move after, so moving a track upward
+            // requires the preceding slot. Keep the wire contract independent of
+            // this host-specific index conversion.
+            if (fromIndex < 0 || toIndex < 0)
                 return false;
+
+            if (fromIndex == toIndex)
+                return true;
 
             int[] fromIndices = { fromIndex };
             int destinationIndex = fromIndex > toIndex
