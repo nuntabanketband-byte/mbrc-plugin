@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using MusicBeePlugin.Providers;
 using MusicBeePlugin.Models;
 using MusicBeePlugin.Ffi;
@@ -22,19 +22,17 @@ namespace MusicBeePlugin.Providers
 
         public bool MoveNowPlayingTrack(int fromIndex, int toIndex)
         {
-            // Create array for source indices (MusicBee API expects array)
+            // MusicBee's NowPlayingList_MoveFiles destination is the insertion
+            // index in the list after source items have been removed. The source
+            // and destination here are zero-based positions from the same
+            // now-playing list query. Do not subtract one when moving upward:
+            // that shifts the track one slot too early and can desynchronise the
+            // active-track marker from the Android queue.
+            if (fromIndex < 0 || toIndex < 0 || fromIndex == toIndex)
+                return false;
+
             int[] fromIndices = { fromIndex };
-
-            // Calculate destination index based on direction of move
-            // This matches the logic from the original Plugin.RequestNowPlayingMove
-            int destinationIndex;
-            if (fromIndex > toIndex)
-                destinationIndex = toIndex - 1;
-            else
-                destinationIndex = toIndex;
-
-            // Call MusicBee API to move the track
-            return _api.NowPlayingList_MoveFiles(fromIndices, destinationIndex);
+            return _api.NowPlayingList_MoveFiles(fromIndices, toIndex);
         }
 
         public bool RemoveFromNowPlayingList(int index)
