@@ -253,6 +253,7 @@ pub const DISPATCHED_CONTEXTS: &[&str] = &[
     // now-playing list
     "nowplayinglist",
     "nowplayinglistplay",
+    "slotplay",
     "nowplayinglistremove",
     "nowplayinglistmove",
     "nowplayinglistsearch",
@@ -313,6 +314,7 @@ pub fn dispatch(ctx: &Ctx, context: &str, data: &Value) -> Option<HandlerResult>
         }
         "nowplayinglist" => nowplaying_list::list(data, ctx),
         "nowplayinglistplay" => nowplaying_list::play(data, ctx),
+        "slotplay" => nowplaying_list::play_path(data, p),
         "nowplayinglistremove" => nowplaying_list::remove(data, p),
         "nowplayinglistmove" => nowplaying_list::move_track(data, p),
         "nowplayinglistsearch" => nowplaying_list::search(data, p),
