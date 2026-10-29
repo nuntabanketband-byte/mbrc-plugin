@@ -33,6 +33,16 @@ pub fn list(data: &Value, ctx: &Ctx) -> HandlerResult {
     )])
 }
 
+/// Play a selected library file by path without changing the Now Playing list.
+pub fn play_path(data: &Value, p: &dyn Providers) -> HandlerResult {
+    let path = as_set_string(data).unwrap_or_default();
+    if path.trim().is_empty() {
+        return Err("slotplay requires a non-empty track path".to_string());
+    }
+    p.play_track_by_path(&path)?;
+    Ok(vec![("slotplay".to_string(), json!(true))])
+}
+
 pub fn play(data: &Value, ctx: &Ctx) -> HandlerResult {
     let mut index = index_of(data);
     // Android sends 1-based list positions; the shipped plugin subtracts 1.
