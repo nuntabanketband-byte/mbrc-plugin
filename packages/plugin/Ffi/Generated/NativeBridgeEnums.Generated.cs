@@ -150,6 +150,7 @@ namespace MusicBeePlugin.Ffi.Generated
         PlaylistDelete = 32,
         PlaylistAppend = 33,
         PlaylistSetFiles = 34,
+        PlayTrackByPath = 35,
     }
 
     public enum HostQueryType
