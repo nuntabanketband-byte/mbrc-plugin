@@ -97,6 +97,7 @@ pub trait Providers: Send + Sync {
     /// say how much is left to play.
     fn now_playing_list_order(&self) -> Result<NowPlayingOrder, String>;
     fn play_list_item(&self, index: i32) -> Result<(), String>;
+    fn play_track_by_path(&self, path: &str) -> Result<(), String>;
     fn remove_list_item(&self, index: i32) -> Result<(), String>;
     fn move_list_item(&self, from: i32, to: i32) -> Result<(), String>;
     fn search_list(&self, query: &str) -> Result<(), String>;
@@ -456,6 +457,12 @@ impl Providers for FfiProviders {
     fn play_list_item(&self, index: i32) -> Result<(), String> {
         self.callbacks
             .execute_command(CommandType::NowPlayingListPlay, &IndexParams { index })
+    }
+    fn play_track_by_path(&self, path: &str) -> Result<(), String> {
+        self.callbacks.execute_command(
+            CommandType::PlayTrackByPath,
+            &StringValueParams { value: path.to_string() },
+        )
     }
     fn remove_list_item(&self, index: i32) -> Result<(), String> {
         self.callbacks
@@ -890,6 +897,9 @@ impl Providers for NullProviders {
     fn play_list_item(&self, _index: i32) -> Result<(), String> {
         Ok(())
     }
+    fn play_track_by_path(&self, _path: &str) -> Result<(), String> {
+        Ok(())
+    }
     fn remove_list_item(&self, _index: i32) -> Result<(), String> {
         Ok(())
     }
@@ -1303,6 +1313,10 @@ impl Providers for MockProviders {
     }
     fn play_list_item(&self, index: i32) -> Result<(), String> {
         self.record(format!("play_list_item({index})"));
+        Ok(())
+    }
+    fn play_track_by_path(&self, path: &str) -> Result<(), String> {
+        self.record(format!("play_track_by_path({path})"));
         Ok(())
     }
     fn remove_list_item(&self, index: i32) -> Result<(), String> {

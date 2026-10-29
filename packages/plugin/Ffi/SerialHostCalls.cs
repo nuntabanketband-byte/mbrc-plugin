@@ -52,6 +52,7 @@ namespace MusicBeePlugin.Ffi
             CommandType.PlaylistSetFiles,
             CommandType.LibraryPlayAll,
             CommandType.NowPlayingListPlay,
+            CommandType.PlayTrackByPath,
             CommandType.NowPlayingListMove,
             CommandType.NowPlayingListRemove,
             CommandType.NowPlayingListClear,

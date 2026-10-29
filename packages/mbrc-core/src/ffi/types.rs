@@ -300,6 +300,8 @@ pub enum CommandType {
     PlaylistDelete = 32,
     PlaylistAppend = 33,
     PlaylistSetFiles = 34,
+    /// Play a library file by absolute path without editing the Now Playing list.
+    PlayTrackByPath = 35,
 }
 
 /// Host -> core queries (request/response), the mirror of [`QueryType`] in the
